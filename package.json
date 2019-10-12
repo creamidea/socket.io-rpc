@@ -4,7 +4,7 @@
   "description": "RPC for SocketIO",
   "main": "lib/index.js",
   "files": [
-    "./lib"
+    "lib"
   ],
   "scripts": {
     "start": "node -r ts-node/register demo/rpc.demo.ts",
