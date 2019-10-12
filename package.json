@@ -1,0 +1,26 @@
+{
+  "name": "socket-io-rpc",
+  "version": "1.0.0",
+  "description": "RPC for SocketIO",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/creamidea/socket-io-rpc.git"
+  },
+  "keywords": [
+    "socketio",
+    "SocketIO",
+    "websocket",
+    "rpc",
+    "RPC"
+  ],
+  "author": "creamidea@gmail.com",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/creamidea/socket-io-rpc/issues"
+  },
+  "homepage": "https://github.com/creamidea/socket-io-rpc#readme"
+}
