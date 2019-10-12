@@ -1,5 +1,5 @@
 {
-  "name": "socket-io-rpc",
+  "name": "@creamery/socket.io-rpc",
   "version": "1.0.0",
   "description": "RPC for SocketIO",
   "main": "lib/index.js",
@@ -15,7 +15,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/creamidea/socket-io-rpc.git"
+    "url": "git@github.com:creamidea/socket.io-rpc.git"
   },
   "keywords": [
     "socketio",
