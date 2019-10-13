@@ -11,6 +11,14 @@ import SocketIO from 'socket.io';
 export interface Vendor {
   id: string;
 
+  /**
+   * TODO
+   * 为了每个 Vendor 做好内存回收
+   * 提供这些生命周期
+   */
+  onEnter?(client: SocketIOClient.Socket): void;
+  onLeave?(client: SocketIOClient.Socket): void;
+
   // 远程调用的方法
   // - 普通调用始终返回 Promise
   // - 如果是监听某些变化，则函数签名通 callback 形式
@@ -89,7 +97,9 @@ export class SocketIORPC {
    * @param client
    */
   join(client: SocketIO.Socket) {
+    // console.log('[RPC Server] join', client.id);
     client.on('call', (message, callback) => {
+      // console.log('[RPC Server] call', message);
       this.call(message, callback);
     });
 
@@ -109,11 +119,11 @@ export class SocketIORPC {
 
     const method = `on${channel}`;
 
-    function callback(result: any) {
+    function callback(...result: any[]) {
       emit('notify', seq, {
         id,
         method,
-        params: Array.isArray(result) ? result : [result],
+        params: result,
       } as Message);
     }
 

@@ -8,10 +8,12 @@ export class SocketIORPCClient {
   private readonly handlers = new Map<number, Function>();
 
   constructor(readonly endpoint: string, readonly opts: SocketIOClient.ConnectOpts) {
-    this.client = io(endpoint, {
-      path: opts.path,
-      transports: ['websocket'],
-    });
+    this.client = io(
+      endpoint,
+      Object.assign({}, opts, {
+        transports: ['websocket'],
+      }),
+    );
 
     this.client.on('notify', (seq: number, message: Message) => {
       // console.log('receive notification:', seq, message);
