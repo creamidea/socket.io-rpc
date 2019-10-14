@@ -2182,6 +2182,11 @@ utils-merge@1.0.1:
   resolved "https://registry.npm.alibaba-inc.com/utils-merge/download/utils-merge-1.0.1.tgz#9f95710f50a267947b2ccc124741c1028427e713"
   integrity sha1-n5VxD1CiZ5R7LMwSR0HBAoQn5xM=
 
+uws@^100.0.1:
+  version "100.0.1"
+  resolved "https://registry.npm.alibaba-inc.com/uws/download/uws-100.0.1.tgz#39b6c14ed4be8af87037b3e8c8965f55a6743fc3"
+  integrity sha1-ObbBTtS+ivhwN7PoyJZfVaZ0P8M=
+
 v8-compile-cache@^2.0.3:
   version "2.1.0"
   resolved "https://registry.npm.alibaba-inc.com/v8-compile-cache/download/v8-compile-cache-2.1.0.tgz#e14de37b31a6d194f5690d67efc4e7f6fc6ab30e"

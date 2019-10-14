@@ -1,6 +1,6 @@
 {
   "name": "@creamery/socket.io-rpc",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "RPC for SocketIO",
   "main": "lib/index.js",
   "module": "lib/index.js",
@@ -35,7 +35,8 @@
     "@types/socket.io": "^2.1.4",
     "@types/socket.io-client": "^1.4.32",
     "socket.io": "^2.3.0",
-    "socket.io-client": "^2.3.0"
+    "socket.io-client": "^2.3.0",
+    "uws": "^100.0.1"
   },
   "devDependencies": {
     "@recore/config": "^2.0.3",
