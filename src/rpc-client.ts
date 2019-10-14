@@ -1,5 +1,5 @@
 import io from 'socket.io-client';
-import { Response, Message, Notifaction } from './rpc-server';
+import { Response, Message, Notifaction } from './common';
 
 export class SocketIORPCClient {
   private readonly client: SocketIOClient.Socket;
@@ -59,7 +59,7 @@ export class SocketIORPCClient {
           const { result, error } = message;
 
           if (error) {
-            reject(`[SocketIO RPC Error] ${error.message}`);
+            reject(new Error(`[SocketIO RPC Error] ${error.message}`));
             return;
           }
 
