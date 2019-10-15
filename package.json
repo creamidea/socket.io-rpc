@@ -1,6 +1,6 @@
 {
   "name": "@creamery/socket.io-rpc",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "RPC for SocketIO",
   "main": "lib/index.js",
   "module": "lib/index.js",

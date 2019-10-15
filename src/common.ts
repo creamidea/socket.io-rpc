@@ -48,7 +48,8 @@ export interface Response {
 }
 
 export interface ResponseError {
-  code: number;
+  code?: number;
+  name?: string;
   message: string;
   data?: any;
 }

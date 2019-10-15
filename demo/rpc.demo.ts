@@ -15,6 +15,7 @@ function createDemoClient() {
   });
 
   const store = rpc.create<Store>('store');
+  const store2 = rpc.create<Store>('store');
 
   store.query('100').then((data: any) => {
     console.log('--> query', data);
@@ -30,6 +31,10 @@ function createDemoClient() {
 
   store.onPriceChange('yyy', (data: any) => {
     console.log('--> yyy price change', data);
+  });
+
+  store2.onPriceChange('2y2y2y', (data: any) => {
+    console.log('--> 2y2y2y price change', data);
   });
 
   store.onChange((data: any) => {

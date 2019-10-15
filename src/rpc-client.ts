@@ -16,7 +16,7 @@ export class SocketIORPCClient {
     );
 
     this.client.on('notify', (seq: number, message: Message) => {
-      // console.log('receive notification:', seq, message);
+      // console.log(new Date(), '--> receive notification:', seq, message);
       const cb = this.handlers.get(seq);
       if (typeof cb === 'function') {
         cb(...message.params);

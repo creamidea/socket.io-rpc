@@ -9,27 +9,31 @@ import * as EventEmitter from 'events';
 import SocketIO from 'socket.io';
 import { Response, Message, Notifaction, Vendor } from './common';
 
-export function NotFoundResponse(id: string) {
+export function NotFoundResponse(id: string, method: string) {
   return {
     id,
+    method,
     error: {
       code: -32601,
       message: 'Method not found',
     },
   };
 }
-export function ErrorResponse(id: string, err: Error) {
+export function ErrorResponse(id: string, method: string, err: Error) {
   return {
     id,
+    method,
     error: {
-      code: 1,
+      code: (err as any).code || -32000,
+      name: err.name,
       message: err.message,
     },
   };
 }
-export function SuccessResponse(id: string, result: any) {
+export function SuccessResponse(id: string, method: string, result: any) {
   return {
     id,
+    method,
     result,
   };
 }
@@ -97,18 +101,21 @@ export class SocketIORPC {
     }
 
     if (typeof vendor[method] === 'function') {
-      vendor[method](...params)
-        .then((result: any) => {
-          callback(SuccessResponse(id, result));
-        })
-        .catch((err: Error) => {
-          callback(ErrorResponse(id, err));
+      const p = vendor[method](...params);
+      if (typeof p.then === 'function' && typeof p.catch === 'function') {
+        p.then((result: any) => {
+          callback(SuccessResponse(id, method, result));
+        }).catch((err: Error) => {
+          callback(ErrorResponse(id, method, err));
         });
+      } else {
+        callback(ErrorResponse(id, method, new Error(`faild: the method must return a promise.`)));
+      }
 
       return;
     }
 
-    callback(NotFoundResponse(id));
+    callback(NotFoundResponse(id, method));
   }
 }
 
