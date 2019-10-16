@@ -44,6 +44,10 @@ export class SocketIORPCClient {
     });
   }
 
+  close() {
+    this.client.close();
+  }
+
   private createCall(id: string, name: string, params: any[]) {
     return new Promise((resolve, reject) => {
       this.client.emit(
