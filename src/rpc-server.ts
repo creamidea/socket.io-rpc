@@ -9,6 +9,20 @@ import * as EventEmitter from 'events';
 import SocketIO from 'socket.io';
 import { Response, Message, Notifaction, Vendor } from './common';
 
+function createCallback({ seq, id, method }: any, emit: typeof EventEmitter.prototype.emit) {
+  // console.info('---> create notify callback');
+  function cb(...result: any[]) {
+    console.info(new Date(), 'notify', seq, id, method, result);
+    emit('notify', seq, {
+      id,
+      method,
+      params: result,
+    } as Message);
+  }
+
+  return cb;
+}
+
 export function NotFoundResponse(id: string, method: string) {
   return {
     id,
@@ -71,17 +85,9 @@ export class SocketIORPC {
 
     const method = `on${channel}`;
 
-    function callback(...result: any[]) {
-      emit('notify', seq, {
-        id,
-        method,
-        params: result,
-      } as Message);
-    }
-
     if (typeof vendor[method] === 'function') {
       try {
-        params.push(callback);
+        params.push(createCallback({ seq, id, method }, emit));
         vendor[method](...params);
       } catch (err) {
         console.error('invalid notify', err);
