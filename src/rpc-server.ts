@@ -5,19 +5,23 @@
  * - 远程过程的实现必须返回 Promise
  * - 消息通知的实现函数签名是以 callback 形式
  */
-import * as EventEmitter from 'events';
-import SocketIO from 'socket.io';
+import SocketIO, { Socket } from 'socket.io';
 import { Response, Message, Notifaction, Vendor } from './common';
 
-function createCallback({ seq, id, method }: any, emit: typeof EventEmitter.prototype.emit) {
+function createCallback({ seq, id, method }: any, client: Socket) {
   // console.info('---> create notify callback');
   function cb(...result: any[]) {
-    console.info(new Date(), 'notify', seq, id, method, result);
-    emit('notify', seq, {
-      id,
-      method,
-      params: result,
-    } as Message);
+    if (client.connected) {
+      // console.info(new Date(), 'notify', seq, id, method, result);
+      client.emit('notify', seq, {
+        id,
+        method,
+        params: result,
+      } as Message);
+    } else {
+      // TODO: cancel this callback
+      // console.error('client was lost, will cancel this callback');
+    }
   }
 
   return cb;
@@ -70,11 +74,11 @@ export class SocketIORPC {
     });
 
     client.on('listen', (message) => {
-      this.notify(message, client.emit.bind(client));
+      this.notify(message, client);
     });
   }
 
-  private notify(msg: Notifaction, emit: typeof EventEmitter.prototype.emit) {
+  private notify(msg: Notifaction, client: Socket) {
     const { id, channel, params, seq } = msg;
     const vendor = this.pool.get(id);
 
@@ -87,7 +91,7 @@ export class SocketIORPC {
 
     if (typeof vendor[method] === 'function') {
       try {
-        params.push(createCallback({ seq, id, method }, emit));
+        params.push(createCallback({ seq, id, method }, client));
         vendor[method](...params);
       } catch (err) {
         console.error('invalid notify', err);

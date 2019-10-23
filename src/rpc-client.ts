@@ -1,11 +1,19 @@
 import io from 'socket.io-client';
 import { Response, Message, Notifaction } from './common';
 
+interface Handler {
+  id: string;
+  seq: number;
+  channel: string;
+  params: any[];
+  callback: Function;
+}
+
 export class SocketIORPCClient {
   private readonly client: SocketIOClient.Socket;
 
   private seq = 0;
-  private readonly handlers = new Map<number, Function>();
+  private readonly handlers = new Map<number, Handler>();
 
   constructor(readonly endpoint: string, readonly opts: SocketIOClient.ConnectOpts) {
     this.client = io(
@@ -17,10 +25,16 @@ export class SocketIORPCClient {
 
     this.client.on('notify', (seq: number, message: Message) => {
       // console.log(new Date(), '--> receive notification:', seq, message);
-      const cb = this.handlers.get(seq);
-      if (typeof cb === 'function') {
-        cb(...message.params);
+      const h = this.handlers.get(seq);
+      if (h && typeof h.callback === 'function') {
+        h.callback.apply(null, message.params);
       }
+    });
+
+    this.client.on('reconnect', () => {
+      this.handlers.forEach((h) => {
+        this.send(h.seq);
+      });
     });
   }
 
@@ -81,12 +95,30 @@ export class SocketIORPCClient {
     }
 
     const seq = this.seq++;
-    this.handlers.set(seq, cb);
-    this.client.emit('listen', {
+    const packet = {
       id,
       seq,
       channel: name.replace(/^on/, ''),
       params,
-    } as Notifaction);
+    } as Notifaction;
+
+    this.handlers.set(seq, {
+      ...packet,
+      callback: cb,
+    } as Handler);
+
+    this.send(seq);
+  }
+
+  private send(seq: number) {
+    const h = this.handlers.get(seq);
+    if (h) {
+      this.client.emit('listen', {
+        id: h.id,
+        seq: h.seq,
+        channel: h.channel,
+        params: h.params,
+      });
+    }
   }
 }
