@@ -1,7 +1,7 @@
 import http from 'http';
 import express from 'express';
 import { MyStore } from './store';
-import { SocketIORPC, SocketIORPCServer } from '../src/rpc-server';
+import { SocketIORPC, SocketIORPCServer } from '../src';
 
 const app = express();
 const server = new http.Server(app);
