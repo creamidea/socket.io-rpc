@@ -68,5 +68,5 @@ export function createDisposable(func: () => void): Disposable {
 }
 
 export function isDisposable(disposable: any) {
-  return disposable && disposable.dispose;
+  return disposable && typeof disposable.dispose === 'function';
 }
