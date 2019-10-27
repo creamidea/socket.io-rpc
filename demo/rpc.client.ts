@@ -1,7 +1,7 @@
 import { Store } from './store';
 import { SocketIORPCClient } from '../src/rpc-client';
 
-const SERVER_PORT = 3002;
+const SERVER_PORT = 3001;
 
 // #region Client
 function createDemoClient() {

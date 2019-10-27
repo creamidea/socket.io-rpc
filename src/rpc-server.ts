@@ -6,7 +6,9 @@
  * - 消息通知的实现函数签名是以 callback 形式
  */
 import SocketIO, { Socket } from 'socket.io';
-import { Response, Message, Notifaction, Vendor } from './common';
+import { Response, Message, Notifaction, Vendor, isDisposable } from './common';
+import { DisposableCollection } from './disposable';
+import { isFunction } from 'util';
 
 function createCallback({ seq, id, method }: any, client: Socket) {
   // console.info('---> create notify callback');
@@ -18,9 +20,6 @@ function createCallback({ seq, id, method }: any, client: Socket) {
         method,
         params: result,
       } as Message);
-    } else {
-      // TODO: cancel this callback
-      // console.error('client was lost, will cancel this callback');
     }
   }
 
@@ -57,10 +56,10 @@ export function SuccessResponse(id: string, method: string, result: any) {
 }
 
 export class SocketIORPC {
-  private readonly pool = new Map<string, Vendor>();
+  private readonly vendors = new Map<string, Vendor>();
 
   register(vendor: Vendor) {
-    this.pool.set(vendor.id, vendor);
+    this.vendors.set(vendor.id, vendor);
   }
 
   /**
@@ -68,6 +67,9 @@ export class SocketIORPC {
    */
   join(client: SocketIO.Socket) {
     // console.log('[RPC Server] join', client.id);
+
+    (client as any).toDispose = new DisposableCollection();
+
     client.on('call', (message, callback) => {
       // console.log('[RPC Server] call', message);
       this.call(message, callback);
@@ -76,11 +78,17 @@ export class SocketIORPC {
     client.on('listen', (message) => {
       this.notify(message, client);
     });
+
+    client.on('disconnect', () => {
+      const toDispose = (client as any).toDispose as DisposableCollection;
+      toDispose.dispose();
+      // console.log('disposaled');
+    });
   }
 
   private notify(msg: Notifaction, client: Socket) {
     const { id, channel, params, seq } = msg;
-    const vendor = this.pool.get(id);
+    const vendor = this.vendors.get(id);
 
     if (!vendor) {
       console.info('not found vendor', id);
@@ -89,10 +97,14 @@ export class SocketIORPC {
 
     const method = `on${channel}`;
 
-    if (typeof vendor[method] === 'function') {
+    if (isFunction(vendor[method])) {
       try {
-        params.push(createCallback({ seq, id, method }, client));
-        vendor[method](...params);
+        const cb = createCallback({ seq, id, method }, client);
+        params.push(cb);
+        const disposable = vendor[method](...params);
+        if (isDisposable(disposable)) {
+          (client as any).toDispose.push(disposable);
+        }
       } catch (err) {
         console.error('invalid notify', err);
       }
@@ -104,7 +116,7 @@ export class SocketIORPC {
   private call(msg: Message, callback: (res: Response) => void) {
     // 普通调用函数
     const { id, method, params } = msg;
-    const vendor = this.pool.get(id);
+    const vendor = this.vendors.get(id);
     if (!vendor) {
       console.info('not found vendor', id);
       return;
@@ -112,7 +124,7 @@ export class SocketIORPC {
 
     if (typeof vendor[method] === 'function') {
       const p = vendor[method](...params);
-      if (typeof p.then === 'function' && typeof p.catch === 'function') {
+      if (isFunction(p.then) && isFunction(p.catch)) {
         p.then((result: any) => {
           callback(SuccessResponse(id, method, result));
         }).catch((err: Error) => {

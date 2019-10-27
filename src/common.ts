@@ -53,3 +53,20 @@ export interface ResponseError {
   message: string;
   data?: any;
 }
+
+export interface Disposable {
+  /**
+   * Dispose this object.
+   */
+  dispose(): void;
+}
+
+export function createDisposable(func: () => void): Disposable {
+  return {
+    dispose: func,
+  };
+}
+
+export function isDisposable(disposable: any) {
+  return disposable && typeof disposable.dispose === 'function';
+}

@@ -1,3 +1,5 @@
+import { createDisposable } from '../src/common';
+
 export interface Store {
   query(name: string): Promise<{ name: string; price: number }>;
   onPriceChange(name: string, callback: Function): void;
@@ -14,21 +16,28 @@ export class MyStore implements Store {
     };
   }
 
-  onPriceChange(name: string, callback: Function) {
-    setInterval(() => {
+  onPriceChange(name: string, callback: (data: any) => void) {
+    const timer = setInterval(() => {
       const price = Math.floor(Math.random() * 1000);
       const data = {
         name,
         price,
       };
-      // console.log('send data', data);
+      console.log('send data', data);
       callback(data);
     }, 1000);
+
+    return createDisposable(() => {
+      clearInterval(timer);
+    });
   }
 
   onChange(callback: Function) {
-    setInterval(() => {
+    const timer = setInterval(() => {
       callback(new Date());
     }, 3000);
+    return createDisposable(() => {
+      clearInterval(timer);
+    });
   }
 }
